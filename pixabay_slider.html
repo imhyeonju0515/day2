@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixabay 이미지 슬라이드</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 1.5rem 1rem; font-family: sans-serif; background: #f3f5f7; color: #222; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    h1 { margin: 0; font-size: 1.4rem; }
+    form { display: flex; flex-wrap: wrap; gap: .5rem; width: 100%; max-width: 720px; }
+    input { padding: .5rem .75rem; font-size: 1rem; border: 1px solid #bbb; border-radius: 8px; flex: 1 1 160px; }
+    button { padding: .5rem 1rem; font-size: 1rem; border: 0; border-radius: 8px; background: #ff8a3d; color: #fff; cursor: pointer; }
+    button:disabled { background: #ccc; cursor: default; }
+    #status { min-height: 1.4rem; color: #555; font-size: .95rem; }
+    .slider { position: relative; width: 100%; max-width: 720px; aspect-ratio: 4 / 3; background: #000; border-radius: 12px; overflow: hidden; display: none; }
+    .slider img { width: 100%; height: 100%; object-fit: contain; }
+    .nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); font-size: 1.5rem; padding: .4rem .8rem; }
+    #prev { left: 8px; } #next { right: 8px; }
+    .caption { position: absolute; left: 0; right: 0; bottom: 0; padding: .4rem .75rem; background: rgba(0,0,0,.55); color: #fff; font-size: .85rem; }
+    .controls { display: none; gap: .5rem; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .controls button { background: #555; }
+    #morebtn { background: #1b7f78; }
+  </style>
+</head>
+<body>
+  <h1>🖼️ Pixabay 이미지 슬라이드</h1>
+
+  <form id="form">
+    <input id="key" type="password" placeholder="Pixabay API 키" autocomplete="off" required>
+    <input id="q" type="text" placeholder="검색어 (예: 제주 감귤, jeju)" required>
+    <button type="submit">검색</button>
+  </form>
+
+  <div id="status">API 키와 검색어를 입력하세요.</div>
+
+  <div class="slider" id="slider">
+    <img id="img" alt="">
+    <button class="nav" id="prev" aria-label="이전">‹</button>
+    <button class="nav" id="next" aria-label="다음">›</button>
+    <div class="caption" id="caption"></div>
+  </div>
+
+  <div class="controls" id="controls">
+    <button id="play">⏸ 자동재생 끄기</button>
+    <span id="pos"></span>
+    <button id="morebtn">다음 10개 불러오기</button>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const PER_PAGE = 10;
+    let images = [], idx = 0, page = 1, query = '', timer = null, playing = true;
+
+    try { $('key').value = localStorage.getItem('pixabayKey') || ''; } catch (e) {}
+
+    async function load(newSearch) {
+      const key = $('key').value.trim();
+      if (newSearch) { query = $('q').value.trim(); page = 1; }
+      $('status').textContent = '불러오는 중...';
+      const url = 'https://pixabay.com/api/?' + new URLSearchParams({
+        key, q: query, image_type: 'photo', per_page: PER_PAGE, page, safesearch: 'true'
+      });
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(res.status === 400 ? 'API 키가 올바르지 않거나 요청이 잘못되었습니다.' : '요청 실패 (' + res.status + ')');
+        const data = await res.json();
+        if (!data.hits.length) { $('status').textContent = '검색 결과가 없습니다.'; return; }
+        try { localStorage.setItem('pixabayKey', key); } catch (e) {}
+        images = data.hits; idx = 0;
+        $('status').textContent = `"${query}" 결과 ${data.totalHits.toLocaleString()}장 중 ${(page - 1) * PER_PAGE + 1}~${(page - 1) * PER_PAGE + images.length}번째`;
+        $('slider').style.display = 'block';
+        $('controls').style.display = 'flex';
+        show(); restart();
+      } catch (err) {
+        $('status').textContent = '오류: ' + err.message;
+      }
+    }
+
+    function show() {
+      const im = images[idx];
+      $('img').src = im.webformatURL;
+      $('img').alt = im.tags;
+      $('caption').textContent = `${im.tags} · by ${im.user}`;
+      $('pos').textContent = `${idx + 1} / ${images.length}`;
+    }
+    const go = d => { idx = (idx + d + images.length) % images.length; show(); restart(); };
+    function restart() {
+      clearInterval(timer);
+      if (playing) timer = setInterval(() => { idx = (idx + 1) % images.length; show(); }, 3000);
+    }
+
+    $('form').addEventListener('submit', e => { e.preventDefault(); load(true); });
+    $('prev').onclick = () => go(-1);
+    $('next').onclick = () => go(1);
+    $('morebtn').onclick = () => { page++; load(false); };
+    $('play').onclick = () => {
+      playing = !playing;
+      $('play').textContent = playing ? '⏸ 자동재생 끄기' : '▶ 자동재생 켜기';
+      restart();
+    };
+  </script>
+</body>
+</html>

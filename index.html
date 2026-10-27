@@ -39,6 +39,17 @@
     aside ul { margin: 0; padding-left: 1.2rem; }
     aside li { margin-bottom: .4rem; }
     .note { font-size: .85rem; color: #777; margin-top: .75rem; }
+    .photo-title { margin-top: 1.5rem; }
+    .photo-form { display: flex; gap: .5rem; margin-bottom: .5rem; }
+    .photo-form input { flex: 1; padding: .5rem .75rem; font-size: 1rem; border: 1px solid #e0c9a8; border-radius: 8px; }
+    .photo-form button, .slider-controls button { padding: .5rem 1rem; font-size: 1rem; border: 0; border-radius: 8px; background: #ff8a3d; color: #fff; cursor: pointer; }
+    .slider { position: relative; aspect-ratio: 4 / 3; background: #000; border-radius: 12px; overflow: hidden; margin-top: .5rem; }
+    .slider[hidden], .slider-controls[hidden] { display: none; }
+    .slider img { width: 100%; height: 100%; object-fit: contain; }
+    .slider .nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); color: #fff; border: 0; font-size: 1.5rem; padding: .3rem .8rem; cursor: pointer; border-radius: 8px; }
+    #prev { left: 8px; } #next { right: 8px; }
+    .caption { position: absolute; left: 0; right: 0; bottom: 0; padding: .4rem .75rem; background: rgba(0,0,0,.55); color: #fff; font-size: .85rem; }
+    .slider-controls { display: flex; justify-content: space-between; align-items: center; margin-top: .5rem; }
     @media (max-width: 700px) {
       .page { grid-template-columns: 1fr; grid-template-areas: "header" "nav" "section" "article" "aside" "footer"; }
     }
@@ -71,6 +82,24 @@
         <div class="item"><b>✨ 황금향</b><small>쓴맛이 적고 부드러워요</small></div>
         <div class="item"><b>🌵 백년초</b><small>주스·잼·비누로 활용</small></div>
       </div>
+
+      <h2 class="photo-title">📷 사진으로 보는 제주</h2>
+      <form id="photoForm" class="photo-form">
+        <input id="photoQ" type="text" value="jeju tangerine" placeholder="검색어 (예: jeju, 감귤)" required>
+        <button type="submit">검색</button>
+      </form>
+      <div id="photoStatus" class="note">불러오는 중...</div>
+      <div class="slider" id="slider" hidden>
+        <img id="slideImg" alt="">
+        <button type="button" class="nav" id="prev" aria-label="이전">‹</button>
+        <button type="button" class="nav" id="next" aria-label="다음">›</button>
+        <div class="caption" id="caption"></div>
+      </div>
+      <div class="slider-controls" id="sliderControls" hidden>
+        <span id="pos"></span>
+        <button type="button" id="morePhotos">다음 10장</button>
+      </div>
+      <p class="note">사진 제공: <a href="https://pixabay.com" target="_blank" rel="noopener">Pixabay</a></p>
     </section>
 
     <article id="sea">
@@ -110,5 +139,53 @@
       © 2026 제주 특산물 이야기 · 만든 사람 김현주 🌊
     </footer>
   </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    let photos = [], idx = 0, page = 1, query = '', timer = null;
+
+    async function loadPhotos(newSearch) {
+      if (newSearch) { query = $('photoQ').value.trim(); page = 1; }
+      $('photoStatus').textContent = '불러오는 중...';
+      try {
+        const res = await fetch('/api/pixabay?' + new URLSearchParams({ q: query, page }));
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '요청 실패 (' + res.status + ')');
+        if (!data.hits.length) {
+          $('photoStatus').textContent = '검색 결과가 없습니다.';
+          return;
+        }
+        photos = data.hits; idx = 0;
+        const start = (page - 1) * 10 + 1;
+        $('photoStatus').textContent = `"${query}" 결과 ${data.totalHits.toLocaleString()}장 중 ${start}~${start + photos.length - 1}번째`;
+        $('slider').hidden = false;
+        $('sliderControls').hidden = false;
+        showPhoto(); restartTimer();
+      } catch (err) {
+        $('photoStatus').textContent = '사진을 불러오지 못했습니다: ' + err.message;
+      }
+    }
+
+    function showPhoto() {
+      const p = photos[idx];
+      $('slideImg').src = p.webformatURL;
+      $('slideImg').alt = p.tags;
+      $('caption').textContent = `${p.tags} · by ${p.user}`;
+      $('pos').textContent = `${idx + 1} / ${photos.length}`;
+    }
+    function move(d) { idx = (idx + d + photos.length) % photos.length; showPhoto(); restartTimer(); }
+    function restartTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => { idx = (idx + 1) % photos.length; showPhoto(); }, 3000);
+    }
+
+    $('photoForm').addEventListener('submit', e => { e.preventDefault(); loadPhotos(true); });
+    $('prev').onclick = () => move(-1);
+    $('next').onclick = () => move(1);
+    $('morePhotos').onclick = () => { page++; loadPhotos(false); };
+
+    query = $('photoQ').value.trim();
+    loadPhotos(false);
+  </script>
 </body>
 </html>
