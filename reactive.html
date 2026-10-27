@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>반응형 메뉴</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: sans-serif; background: #f3f5f7; color: #222; line-height: 1.6; }
+    .topbar { position: sticky; top: 0; z-index: 10; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    .bar { max-width: 1000px; margin: 0 auto; padding: 0 1rem; min-height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-weight: bold; font-size: 1.2rem; color: #ff8a3d; text-decoration: none; }
+    nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: .25rem; }
+    nav a { display: block; padding: .6rem 1rem; border-radius: 8px; color: #222; text-decoration: none; font-weight: bold; }
+    nav a:hover, nav a.active { background: #ffe2cc; color: #b85c00; }
+    .burger { display: none; width: 44px; height: 44px; border: 0; background: none; cursor: pointer; padding: 10px; }
+    .burger span { display: block; height: 3px; margin: 6px 0; background: #222; border-radius: 2px; transition: transform .25s, opacity .25s; }
+    .burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+    .burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+    main { max-width: 1000px; margin: 0 auto; padding: 1rem; }
+    .panel { display: none; background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .panel.show { display: block; }
+    .panel h1 { margin: 0 0 .5rem; font-size: clamp(1.3rem, 4vw, 1.8rem); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .75rem; margin-top: 1rem; }
+    .card { background: #fff8ef; border: 1px solid #ffe0b8; border-radius: 10px; padding: .9rem; }
+    .card b { display: block; }
+    .card small { color: #777; }
+
+    @media (max-width: 700px) {
+      .burger { display: block; }
+      nav { position: absolute; top: 100%; left: 0; right: 0; background: #fff; box-shadow: 0 6px 10px rgba(0,0,0,.1); max-height: 0; overflow: hidden; transition: max-height .3s; }
+      nav.open { max-height: 400px; }
+      nav ul { flex-direction: column; padding: .5rem 1rem 1rem; }
+      nav a { padding: .8rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="bar">
+      <a class="logo" href="#food">🧭 카테고리</a>
+      <button class="burger" id="burger" aria-label="메뉴 열기" aria-expanded="false" aria-controls="menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="menu" aria-label="카테고리">
+        <ul>
+          <li><a href="#food">🍽️ 음식</a></li>
+          <li><a href="#furniture">🛋️ 가구</a></li>
+          <li><a href="#realestate">🏠 부동산</a></li>
+          <li><a href="#stock">📈 주식</a></li>
+          <li><a href="#map">🗺️ 지도</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <main>
+    <section class="panel" id="food">
+      <h1>🍽️ 음식</h1>
+      <p>맛집과 레시피, 제철 먹거리를 모아 봅니다.</p>
+      <div class="cards">
+        <div class="card"><b>🍊 감귤</b><small>제철 과일</small></div>
+        <div class="card"><b>🐖 흑돼지</b><small>제주 대표 구이</small></div>
+        <div class="card"><b>🐟 갈치조림</b><small>든든한 한 끼</small></div>
+      </div>
+    </section>
+
+    <section class="panel" id="furniture">
+      <h1>🛋️ 가구</h1>
+      <p>공간에 어울리는 가구와 인테리어 정보를 살펴봅니다.</p>
+      <div class="cards">
+        <div class="card"><b>🛏️ 침대</b><small>침실 가구</small></div>
+        <div class="card"><b>🪑 의자</b><small>책상·식탁용</small></div>
+        <div class="card"><b>🗄️ 수납장</b><small>정리 정돈</small></div>
+      </div>
+    </section>
+
+    <section class="panel" id="realestate">
+      <h1>🏠 부동산</h1>
+      <p>매매·전월세 정보와 지역별 동향을 확인합니다.</p>
+      <div class="cards">
+        <div class="card"><b>🏢 아파트</b><small>매매·전세</small></div>
+        <div class="card"><b>🏡 주택</b><small>단독·다세대</small></div>
+        <div class="card"><b>🏬 상가</b><small>임대·분양</small></div>
+      </div>
+    </section>
+
+    <section class="panel" id="stock">
+      <h1>📈 주식</h1>
+      <p>시장 소식과 종목 정보를 한눈에 봅니다. (예시 화면이며 투자 조언이 아닙니다)</p>
+      <div class="cards">
+        <div class="card"><b>📊 시장 동향</b><small>지수와 뉴스</small></div>
+        <div class="card"><b>⭐ 관심 종목</b><small>나만의 목록</small></div>
+        <div class="card"><b>📰 공시</b><small>기업 소식</small></div>
+      </div>
+    </section>
+
+    <section class="panel" id="map">
+      <h1>🗺️ 지도</h1>
+      <p>위치 검색과 길 찾기 정보를 보여 줍니다.</p>
+      <div class="cards">
+        <div class="card"><b>📍 내 주변</b><small>가까운 장소</small></div>
+        <div class="card"><b>🚗 길 찾기</b><small>자동차·대중교통</small></div>
+        <div class="card"><b>⭐ 즐겨찾기</b><small>저장한 장소</small></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const burger = document.getElementById('burger');
+    const menu = document.getElementById('menu');
+    const links = menu.querySelectorAll('a');
+    const panels = document.querySelectorAll('.panel');
+
+    function setOpen(open) {
+      menu.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open);
+      burger.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
+    }
+    burger.addEventListener('click', () => setOpen(!menu.classList.contains('open')));
+
+    function showPanel(id) {
+      const target = document.getElementById(id) && document.getElementById(id).classList.contains('panel') ? id : 'food';
+      panels.forEach(p => p.classList.toggle('show', p.id === target));
+      links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + target));
+      setOpen(false);
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const id = a.getAttribute('href').slice(1);
+        showPanel(id);
+        try { history.replaceState(null, '', '#' + id); } catch (err) {}
+      });
+    });
+    window.addEventListener('hashchange', () => showPanel(location.hash.slice(1)));
+    showPanel(location.hash.slice(1) || 'food');
+  </script>
+</body>
+</html>
