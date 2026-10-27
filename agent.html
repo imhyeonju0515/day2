@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>제주 특산물 에이전트</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: sans-serif; background: #fff8ef; height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    .chat { width: 100%; max-width: 560px; height: 100%; display: flex; flex-direction: column; background: #fff; box-shadow: 0 0 12px rgba(0,0,0,.08); }
+    header { background: #ff8a3d; color: #fff; padding: .9rem 1rem; font-weight: bold; text-align: center; }
+    #log { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: .6rem; }
+    .msg { max-width: 75%; padding: .6rem .9rem; border-radius: 16px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .me { align-self: flex-end; background: #ffd9a8; border-bottom-right-radius: 4px; }
+    .bot { align-self: flex-start; background: #e9f6f4; border-bottom-left-radius: 4px; }
+    form { display: flex; gap: .5rem; padding: .75rem; border-top: 1px solid #eee; }
+    input { flex: 1; padding: .6rem .8rem; font-size: 1rem; border: 1px solid #ddd; border-radius: 999px; }
+    button { padding: .6rem 1.1rem; font-size: 1rem; border: 0; border-radius: 999px; background: #ff8a3d; color: #fff; cursor: pointer; }
+    .fake { text-align: center; font-size: .72rem; color: #999; padding: .35rem .5rem .6rem; }
+  </style>
+</head>
+<body>
+  <div class="chat">
+    <header>🍊 제주 특산물 에이전트</header>
+    <div id="log"></div>
+    <form id="form">
+      <input id="input" type="text" placeholder="메시지를 입력하세요" autocomplete="off" required>
+      <button type="submit">보내기</button>
+    </form>
+    <div class="fake">※ 지금 답변은 미리 정해 둔 가짜 답이에요.</div>
+  </div>
+
+  <script>
+    const log = document.getElementById('log');
+    const input = document.getElementById('input');
+    const replies = [
+      '안녕하세요, 김현주님! 🍊 제주 특산물 안내 에이전트예요. 감귤, 흑돼지, 갈치 중에 어떤 게 가장 궁금하세요?',
+      '그렇다면 겨울에 제철인 한라봉을 추천해요! 🍋 새콤달콤하고 과즙이 풍부해서 선물용으로도 좋아요.',
+      '아직 공부 중이에요! 5일차에 진짜로 알아볼게요.'
+    ];
+    let turn = 0;
+
+    function add(text, who) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + who;
+      div.textContent = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    document.getElementById('form').addEventListener('submit', e => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      add(text, 'me');
+      input.value = '';
+      const reply = replies[turn % replies.length];
+      turn++;
+      setTimeout(() => add(reply, 'bot'), 1000);
+    });
+  </script>
+</body>
+</html>
