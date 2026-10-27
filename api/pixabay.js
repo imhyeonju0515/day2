@@ -24,7 +24,8 @@ module.exports = async (req, res) => {
   try {
     const upstream = await fetch('https://pixabay.com/api/?' + params);
     if (!upstream.ok) {
-      return res.status(upstream.status).json({ error: 'Pixabay 요청 실패 (' + upstream.status + ')' });
+      const detail = (await upstream.text()).slice(0, 200);
+      return res.status(upstream.status).json({ error: 'Pixabay 요청 실패 (' + upstream.status + '): ' + detail });
     }
     const data = await upstream.json();
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');

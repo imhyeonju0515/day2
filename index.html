@@ -85,10 +85,10 @@
 
       <h2 class="photo-title">📷 사진으로 보는 제주</h2>
       <form id="photoForm" class="photo-form">
-        <input id="photoQ" type="text" value="jeju tangerine" placeholder="검색어 (예: jeju, 감귤)" required>
+        <input id="photoQ" type="text" placeholder="검색어 입력 (예: jeju, 감귤)" required>
         <button type="submit">검색</button>
       </form>
-      <div id="photoStatus" class="note">불러오는 중...</div>
+      <div id="photoStatus" class="note">검색어를 입력하고 검색 버튼을 누르면 사진이 0.5초마다 한 장씩 넘어갑니다.</div>
       <div class="slider" id="slider" hidden>
         <img id="slideImg" alt="">
         <button type="button" class="nav" id="prev" aria-label="이전">‹</button>
@@ -176,7 +176,7 @@
     function move(d) { idx = (idx + d + photos.length) % photos.length; showPhoto(); restartTimer(); }
     function restartTimer() {
       clearInterval(timer);
-      timer = setInterval(() => { idx = (idx + 1) % photos.length; showPhoto(); }, 3000);
+      timer = setInterval(() => { idx = (idx + 1) % photos.length; showPhoto(); }, 500);
     }
 
     $('photoForm').addEventListener('submit', e => { e.preventDefault(); loadPhotos(true); });
@@ -184,8 +184,6 @@
     $('next').onclick = () => move(1);
     $('morePhotos').onclick = () => { page++; loadPhotos(false); };
 
-    query = $('photoQ').value.trim();
-    loadPhotos(false);
   </script>
 </body>
 </html>
